@@ -3513,5 +3513,9 @@
     "Report errors in .js files.": {
         "category": "Message",
         "code": 8019
+    },
+    "Possible logical redundancy in binary expression.": {
+        "category": "Warning",
+        "code": 8020
     }
 }

@@ -16772,7 +16772,15 @@ namespace ts {
                         rightType = rightIsLiteral ? getBaseTypeOfLiteralType(rightType) : rightType;
                     }
                     if (!isTypeEqualityComparableTo(leftType, rightType) && !isTypeEqualityComparableTo(rightType, leftType)) {
-                        reportOperatorError();
+                        const isPropertyAccessExpression = left.kind === SyntaxKind.PropertyAccessExpression || right.kind === SyntaxKind.PropertyAccessExpression;
+                        const isUnionType = leftType.flags === TypeFlags.Union || rightType.flags === TypeFlags.Union;
+                        const isEnumType = leftType.flags === TypeFlags.Enum || rightType.flags === TypeFlags.Enum;
+                        const isEnumLiteralType = leftType.flags === TypeFlags.EnumLiteral || rightType.flags === TypeFlags.EnumLiteral;
+                        if (isPropertyAccessExpression && !isUnionType && !isEnumType && !isEnumLiteralType) {
+                            reportOperatorWarning();
+                        } else {
+                            reportOperatorError();
+                        }
                     }
                     return booleanType;
                 case SyntaxKind.InstanceOfKeyword:
@@ -16848,6 +16856,10 @@ namespace ts {
 
             function reportOperatorError() {
                 error(errorNode || operatorToken, Diagnostics.Operator_0_cannot_be_applied_to_types_1_and_2, tokenToString(operatorToken.kind), typeToString(leftType), typeToString(rightType));
+            }
+
+            function reportOperatorWarning() {
+                error(errorNode || operatorToken, Diagnostics.Possible_logical_redundancy_in_binary_expression, tokenToString(operatorToken.kind), typeToString(leftType), typeToString(rightType));
             }
         }
 
